@@ -2,7 +2,7 @@
 
 The purpose of this small script is to create a Cassandra-User which has limited access to a given number of tables in the same keyspace.  
 
-The reason is the following architectural requirement:
+The reason is the following architectural requirement:  
 ![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/create-restricted-cassandra-user/blob/master/doc/architecture_overview.png )
 
 To goal is to separate the OAuth-AuthZ-Server part from the API-Manager runtime for security reasons to avoid someone who has access to the API-Manager can then also generate access token.  
@@ -41,6 +41,7 @@ Just clone this project or download the Shell-Script.
   - Initial version
 
 ## Limitations/Caveats
+- it is not possible to delete a token using the API-Manager Admin-UI
 
 ## Contributing
 
