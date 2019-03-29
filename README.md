@@ -3,14 +3,17 @@
 The purpose of this small script is to create a Cassandra-User which has limited access to a given number of tables in the same keyspace.  
 
 The reason is the following architectural requirement:
-![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/create-restricted-cassandra-user/doc/architecture_overview.png )
+![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/create-restricted-cassandra-user/blob/master/doc/architecture_overview.png )
 
-To goal is to separate the OAuth-AuthZ-Server part from the API-Manager runtime to avoid someone who has access to the API-Manager can generate access token.  
-But this separation only makes sense, if both API-Gateway-Instances are using a different cassandra-user with restricted access permissions.  
-The Authorization-Server will have write permission to modify entries in the OAuth-Tables: oauth_....
-The API-Manager will have read permission only to just load access tokens.  
+To goal is to separate the OAuth-AuthZ-Server part from the API-Manager runtime for security reasons to avoid someone who has access to the API-Manager can then also generate access token.  
+AuthZ-Server and API-Manager will use distinct unique groups.
+![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/create-restricted-cassandra-user/blob/master/doc/authz_and_manager_group.png )
 
-As Cassandra doesn't support it easily to restrict permissions on a per table basis, this script is creating these two kind of users.   
+But, this separation only makes sense, if both API-Gateway-Instances are using a different cassandra-users with restricted access permissions.  
+- The Authorization-Server will have write permission to modify entries in the OAuth-Tables: oauth_....
+- The API-Manager will have read permission ONLY to just load access tokens.    
+
+As Cassandra doesn't support it to restrict permissions on a per table basis, this script is creating these two kind of users and grant individual permission on each table.   
 
 ## Usage of the script:
 ```
