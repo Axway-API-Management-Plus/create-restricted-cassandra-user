@@ -1,71 +1,43 @@
-# Swagger based promotion for Axway API-Manager V7
+# Script to create limited Cassandra-Users
 
-This project provides you with a tool that simplifies your DevOps experience with the Axway API-Manager Version 7.x. 
+The purpose of this small script is to create a Cassandra-User which has limited access to a given number of tables in the same keyspace.  
 
-The program works based on the API-Swagger-Definition + an API-Configuration-File and replicates this "state" into the API-Manager. Consider the Swagger-Definition + API-Config as the "__desired__" state and API-Manager has the "__actual__" state. This program will compare both, the desired with the actual state, and performs all neccassary actions to bring the API-Manager API into the desired state.
+The reason is the following architectural requirement:
+![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/create-restricted-cassandra-user/doc/architecture_overview.png )
 
-Watch this video (28 min): https://youtu.be/2i8i1zMAMps to get an overview + demo.
+To goal is to separate the OAuth-AuthZ-Server part from the API-Manager runtime to avoid someone who has access to the API-Manager can generate access token.  
+But this separation only makes sense, if both API-Gateway-Instances are using a different cassandra-user with restricted access permissions.  
+The Authorization-Server will have write permission to modify entries in the OAuth-Tables: oauth_....
+The API-Manager will have read permission only to just load access tokens.  
 
-With that, an API-Developer is just providing the Swagger-File (e.g. Code-Generated or using a Swagger-Editor) and the API-Config. When checked in, the CI/CD-Pipelines picks it up and replicates it into the API-Manager. 
-This includes __Zero-Downtime-Upgrade of existing applications__, which might have an active subscription to an API. Learn more in the [documentation](https://github.com/Axway-API-Management-Plus/apimanager-swagger-promote/wiki).
+As Cassandra doesn't support it easily to restrict permissions on a per table basis, this script is creating these two kind of users.   
 
-![API-Manager Swagger-Promote overview]( https://github.com/Axway-API-Management-Plus/apimanager-swagger-promote/blob/master/src/lib/images/apimanager-swagger-promote-overview.png )
+## Usage of the script:
+```
+Usage: ./create_restricted_user.sh -m <apim|authz> -k <your-keyspace> -u <user_to_be_created> -p <password_to_use> -au cassandra -ap cassandra
 
-Today the following API-Properties are already supported and can be controlled externally:
-- State-Handling (Unpblished, Published, Dreprecated & Deleted)
-- API-Summary, API-description
-- API-Image 
-- API-Version
-- API-Path
-- API-Inbound-Security settings 
-  - incl. all custom settings (e.g. API-Key settings, etc.)
-- Outbound-Custom-Policies
-  - Routing, Request, Response, FaultHandler
-- Outbound Authentication
-- Backend Base-Path
-- CORS-Setup
-- V-Host
-- Tags
-- Custom-Properties
-- Quota-Management (Application- & System-Default-Quota)
-- Client-Organization handling  
+-m, --mode		Mode: apim: Read-Only access to OAuth-Tables | authz: Write access to OAuth-Tables
+-k, --keyspace		Cassandra keyspace which is used by API-Manager & AuthZ-Server
+-u, --username		A new Cassandra user with this username will be created.
+-p, --password		A new Cassandra user with this password will be created.
+-au, --adminUser  	Username having admin-permissions to create new users.
+-ap, --adminPassword	Password of user having admin-permissions to create new users.
+-cqlsh			Path to cqlsh - Optional if cqlsh is in the path and executable
 
-Improving the API-Development experience during the API-Design phase leveraging the Stoplight integration. [Learn more](https://github.com/Axway-API-Management-Plus/apimanager-swagger-promote/wiki/Stoplight-Integration).
+Examples: 
+./create_restricted_user.sh -m apim -k x65cd4036_751f_433e_acde_a8008b89444c_group_2 -u apim_user -p changeme -au cassandra -ap cassandra
+./create_restricted_user.sh -m apim -k x65cd4036_751f_433e_acde_a8008b89444c_group_2 -u apim_user -p changeme -au cassandra -ap cassandra -cqlsh ./bin/cqlsh
+```
 
-Build and tested with API-Manager 7.6.2 SP2 at Travis CI:  
-Develop: [![Build Status](https://travis-ci.org/Axway-API-Management-Plus/apimanager-swagger-promote.svg?branch=develop)](https://travis-ci.org/Axway-API-Management-Plus/apimanager-swagger-promote)
-Master: [![Build Status](https://travis-ci.org/Axway-API-Management-Plus/apimanager-swagger-promote.svg?branch=master)](https://travis-ci.org/Axway-API-Management-Plus/apimanager-swagger-promote)
 
 ## Install
-- Download the latest [release](https://github.com/Axway-API-Management-Plus/apimanager-swagger-promote/releases)
-- extract the tar.gz file
-- make sure you have JRE 8 installed and setup JAVA_HOME environment variable
-
-## Usage
-- run the script scripts/run-swagger-import.sh to see the basic usage and some samples
-- more information can be found in the project [wiki](https://github.com/Axway-API-Management-Plus/apimanager-swagger-promote/wiki) 
+Just clone this project or download the Shell-Script.
 
 ## Changelog
-- 1.0.0 - 12.12.2018
-  - Initial version that supports all API-Properties besides method level settings
-- 1.0.1 - 13.12.2018
-  - Added support for API-Manager 7.5.3 plus minor fixes
-- 1.1.0 - 18.12.2018
-  - Added support for Qouta-Management plus minor fixes
-- 1.2.0 - 20.12.2018
-  - Added support for API-Outbound AuthN and support to configure the API-Backend-Basepath
-- 1.3.0 - 08.03.2019
-  - Added support for Organization- & Application-Management
-- 1.4.0 - 14.03.2019
-  - Added support to refer a Swagger-File from a URL instead of the local File-System only
-- 1.4.1 - 20.03.2019
-  - Stabilized handling of Client-Orgs and Client-Apps (added support for modes: add|replace|ignore) 
-
+- 1.0.0 - 29.03.2019
+  - Initial version
 
 ## Limitations/Caveats
-- API-Method-Level description is not yet supported
-- Method-Level settings such as individual Security, Custom-Policies, etc. not yet supported
-- Deep merge of stage-config files isn't supported
 
 ## Contributing
 
