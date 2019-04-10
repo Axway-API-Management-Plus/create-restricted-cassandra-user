@@ -29,7 +29,7 @@ Usage: ./create_restricted_user.sh -m <apim|authz> -k <your-keyspace> -u <user_t
 
 Examples: 
 ./create_restricted_user.sh -m apim -k x65cd4036_751f_433e_acde_a8008b89444c_group_2 -u apim_user -p changeme -au cassandra -ap cassandra
-./create_restricted_user.sh -m apim -k x65cd4036_751f_433e_acde_a8008b89444c_group_2 -u apim_user -p changeme -au cassandra -ap cassandra -cqlsh ./bin/cqlsh
+./create_restricted_user.sh -m authz -k x65cd4036_751f_433e_acde_a8008b89444c_group_2 -u oauth_user -p somedifferent -au cassandra -ap cassandra -cqlsh ./bin/cqlsh
 ```
 
 
